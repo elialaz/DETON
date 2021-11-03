@@ -17,7 +17,6 @@ imm_sizes -- a dictionary associating instruction formats possessing an immediat
 from enum import Enum
 from typing import Set, Mapping, Tuple
 
-
 # An enumeration of the 32 unprivileged RISC-V integer registers
 class Register(Enum):
     ZERO = 0

@@ -24,6 +24,7 @@ trace_heat_map: Dict[int, Tuple[List[int], tracer.SupplementInfo]] = None
 cfg: DiGraph = None
 
 
+
 def get_args():
 
     parser = argparse.ArgumentParser(description="DETON")
@@ -280,11 +281,6 @@ def apply_techniques(heat, scrambling_repetition, obfuscate_repetition, garbage_
 
 
 def execute(name: str, entry: str, heat: int, scrambling_repetition: int, obfuscate_repetition: int, garbage_repetition: int, garb_size: int, output: str, bench: bool, metric: bool):
-    """
-    This function a bunch of benchmarks
-    @param name: the name of the benchmark
-    @param entry: the entry point of the executable, if different from main
-    """
 
     global heat_map
     global heat_file
@@ -345,6 +341,7 @@ def execute(name: str, entry: str, heat: int, scrambling_repetition: int, obfusc
         heat_file.write("\n\n\nObfuscated version:\n")
         write_heat(False, calc_fragmentation())
         heat_file.close()
+        metrics_file.close()
 
     # Write the output file
     if bench==True:

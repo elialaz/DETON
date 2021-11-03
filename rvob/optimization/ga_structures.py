@@ -49,6 +49,10 @@ class cromosome:
             self.punt_heat = punt
             self.punt_tot += self.punt_heat
 
+    def print_param(self):
+        print("\n Point: " + str(self.punt_tot) + " ( punt_over: " + str(self.punt_over) + " punt_heat: " + str(self.punt_heat) + " )")
+        print("\n Heat: " + str(self.heat) + " Garbage: " + str(self.garbage) + " Garbage block size: " + str(self.garbage_block) + " Scrambling: " + str(self.scrambling) + " Obfuscation: " + str(self.obfuscate))
+
 
 class population:
     def __init__(self, n):

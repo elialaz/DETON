@@ -4,6 +4,7 @@ from optimization.setup_popolation import setup_population
 from os import path
 from optimization.fitness import fitness
 from optimization.crossover import crossover
+from optimization.mutation import mutation
 
 
 def get_args():
@@ -51,7 +52,7 @@ def run_gen(p, n_individuals, file: str, entry: str, overhead: int):
 
 
 def ga(overhead: int, file: str, entry: str):
-    n_individuals = 10
+    n_individuals = 20
     generation = 200
 
     # setup the population
@@ -79,13 +80,14 @@ def ga(overhead: int, file: str, entry: str):
             else:
                 improvements = ((population.individuals[classifica[0][1]].punt_tot - best_cromosome.punt_tot) / 400)
                 best_cromosome = population.individuals[classifica[0][1]]
-                if improvements <= 2:
+                if improvements <= 1:
                     useless_gen = useless_gen + 1
 
         # apply the crossover
         population = crossover(population, classifica, n_individuals)
 
         # apply the mutation on the new generation
+        mutation(population, n_individuals, classifica)
 
         if (useless_gen == 50) or (best_cromosome.punt_tot > 19900):
             i = False

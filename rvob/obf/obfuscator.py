@@ -24,16 +24,19 @@ class NodeBlock:
     @var init_line: the first line where you can insert an instruction
     @var end_line: the last line where you can insert an instruction
     """
+
     def __init__(self, node_id: int, reg_pool: set, init_line: int, end_line: int):
         self.node_id = node_id
         self.reg_pool = reg_pool
         self.init_line = init_line
         self.end_line = end_line
+        self.conjunction_reg = None
 
     node_id: int
     reg_pool: set
     init_line: int
     end_line: int
+    conjunction_reg: Register
 
 
 def evaluate_next_node(cfg: DiGraph, actual_node: int, register) -> NodeBlock:
@@ -61,22 +64,33 @@ def evaluate_next_node(cfg: DiGraph, actual_node: int, register) -> NodeBlock:
                 return None
             else:
                 node_block.init_line += 1
-        if len(reg_pool) == 0:
+                node_block.end_line += 1
+        if len(reg_pool) <= 1:
             return None
         return node_block
 
 
-def calc_free_reg(node: DiGraph.node) -> set:
+def calc_free_reg(node: DiGraph.node, start_line: int = None) -> set:
     """
     The function calculates which are the usable registers in a given node of the graph, the obtained set is calculated
     by removing from set set of all the register the "not modifiable register" and the register contained in the "reg_bind"
     attribute of the node
     @param node: the node we need the free register
+    @param start_line: initial line of the alternative sequence (if this is the first node)
     @return: the set of the usable register for the current node
     """
+
     free_reg = set(Register.list())
     free_reg -= not_modifiable_regs
-    free_reg -= set(reg for reg in node["reg_bind"].keys())
+    if start_line is not None:
+        used = []
+        for reg in node["reg_bind"].keys():
+            for block in node["reg_bind"][reg]:
+                if block.init_line >= start_line or block.end_line >= start_line:
+                    used.append(reg)
+        free_reg -= set(used)
+    else:
+        free_reg -= set(reg for reg in node["reg_bind"].keys())
     return free_reg
 
 
@@ -105,50 +119,65 @@ def calc_nodes_chain(cfg: DiGraph, start_node: int, start_line: int, register: R
     """
     actual_node = start_node
     actual_block = cfg.nodes[actual_node]["block"]
-    node_chain = [NodeBlock(start_node, calc_free_reg(cfg.nodes[start_node]), start_line, start_line)]
-    if len(node_chain[0].reg_pool) == 0:
+    node_chain = [NodeBlock(start_node, calc_free_reg(cfg.nodes[start_node], start_line), start_line, start_line)]
+    if len(node_chain[0].reg_pool) <= 1:
         raise NotEnoughtRegisters
     if start_line == (cfg.nodes[start_node]['block'].end - 1):
         next_node = evaluate_next_node(cfg, actual_node, register)
         if next_node is None:
             return node_chain
         else:
-            node_chain.append(next_node)
-            actual_node = next_node.node_id
-            actual_block = cfg.nodes[next_node.node_id]['block']
-            line = next_node.init_line
+            conjunction = sample(node_chain[-1].reg_pool.intersection(next_node.reg_pool), 1)[0]
+            if conjunction is None or len(node_chain[-1].reg_pool) <= 2:
+                return node_chain
+            else:
+                node_chain[-1].conjunction_reg = conjunction
+                node_chain[-1].reg_pool.remove(conjunction)
+                next_node.reg_pool.remove(conjunction)
+                node_chain.append(next_node)
+                actual_node = next_node.node_id
+                actual_block = cfg.nodes[next_node.node_id]['block']
+                line = next_node.init_line
     else:
         line = start_line
     while True:
         for instr in actual_block.iter(line):
-            if (instr.r2 == register) or (instr.r3 == register) or (is_store_instruction(instr) and instr.r1 == register):
+            if (instr.r2 == register) or (instr.r3 == register) or (
+                    is_store_instruction(instr) and instr.r1 == register):
                 return node_chain
             node_chain[-1].end_line += 1
         next_node = evaluate_next_node(cfg, actual_node, register)
         if next_node is None:
             return node_chain
         else:
-            node_chain.append(next_node)
-            line = next_node.init_line
-            actual_node = next_node.node_id
-            actual_block = cfg.nodes[next_node.node_id]['block']
+            conjunction = sample(node_chain[-1].reg_pool.intersection(next_node.reg_pool), 1)[0]
+            if conjunction is None or len(node_chain[-1].reg_pool) <= 2:
+                return node_chain
+            else:
+                node_chain[-1].conjunction_reg = conjunction
+                node_chain[-1].reg_pool.remove(conjunction)
+                next_node.reg_pool.remove(conjunction)
+                node_chain.append(next_node)
+                line = next_node.init_line
+                actual_node = next_node.node_id
+                actual_block = cfg.nodes[next_node.node_id]['block']
 
 
-def calc_unresolved_register(prm_chain: List[Promise]) -> int:
-    """
-    This function calculates the number of unresolved registers
-    @param prm_chain: a list of promises
-    @return: the number of needed free registers
-    """
-    virtual_reg = set()
-    for promise in prm_chain:
-        if isinstance(promise.rd, int):
-            virtual_reg.add(promise.rd)
-        if isinstance(promise.rs1, int):
-            virtual_reg.add(promise.rs1)
-        if isinstance(promise.rs2, int):
-            virtual_reg.add(promise.rs2)
-    return len(virtual_reg)
+# def calc_unresolved_register(prm_chain: List[Promise]) -> int:
+#     """
+#     This function calculates the number of unresolved registers
+#     @param prm_chain: a list of promises
+#     @return: the number of needed free registers
+#     """
+#     virtual_reg = set()
+#     for promise in prm_chain:
+#         if isinstance(promise.rd, int):
+#             virtual_reg.add(promise.rd)
+#         if isinstance(promise.rs1, int):
+#             virtual_reg.add(promise.rs1)
+#         if isinstance(promise.rs2, int):
+#             virtual_reg.add(promise.rs2)
+#     return len(virtual_reg)
 
 
 def generate_positions(node_chain: List[NodeBlock], obj_num: int) -> List[Tuple[int, List[int]]]:
@@ -165,7 +194,7 @@ def generate_positions(node_chain: List[NodeBlock], obj_num: int) -> List[Tuple[
     # redistribute the promises over the selected nodes
     a = sample(range(0, obj_num), len(node_chain) - 1) + [0, obj_num]
     list.sort(a)
-    b = [a[i+1] - a[i] for i in range(len(a) - 1)]
+    b = [a[i + 1] - a[i] for i in range(len(a) - 1)]
     for i in range(len(b)):
         node = node_chain[i].node_id
         pos = list()
@@ -180,7 +209,8 @@ def generate_positions(node_chain: List[NodeBlock], obj_num: int) -> List[Tuple[
     shift_amount = [0 for _ in range(len(positions))]
     for t in range(len(positions)):
         for t2 in range(0, t):
-            if t != t2 and len(positions[t2][1]) > 0 and len(positions[t][1]) > 0 and positions[t2][1][0] < positions[t][1][0]:
+            if t != t2 and len(positions[t2][1]) > 0 and len(positions[t][1]) > 0 and positions[t2][1][0] < \
+                    positions[t][1][0]:
                 shift_amount[t] += len(positions[t2][1])
     for t in range(len(positions)):
         for t2 in range(len(positions[t][1])):
@@ -188,25 +218,26 @@ def generate_positions(node_chain: List[NodeBlock], obj_num: int) -> List[Tuple[
     return positions
 
 
-def check_reg(register, matrix, reg_pool: set) -> str:
+def check_reg(virtual_reg, matrix, selected_reg: Register) -> str:
     """
     check if a register, that is contained in a promise, is clearly defined or is associated to a number that act as
     a pseudo-name; in this last case the function try to check if that pseudo-name is already solved to a real register
     otherwise chose randomly a free reg to associate to it
-    @param register: the register to inspect
+    @param virtual_reg: the register to inspect
     @param matrix: the dictionary that contains all the association between pseudo-name and register already solved
-    @param reg_pool: the set of free reg from which extract a new one to associate to a pseudo-name register
+    @param selected_reg: the register to use, in case virtual_reg is a placeholder and there isn't a match in
+                        the register matrix
     @return: the name of a real register
     """
-    if isinstance(register, int):
+    if isinstance(virtual_reg, int):
         try:
-            reg = matrix[register]
+            reg = matrix[virtual_reg]
         except KeyError:
-            reg = sample(reg_pool, 1)[0]
-            matrix[register] = reg
+            matrix[virtual_reg] = selected_reg
+            reg = selected_reg
         return reg
     else:
-        return register
+        return virtual_reg
 
 
 def fix_original_instruction(line: int, new_instr: List[Tuple[int, List[int]]]):
@@ -243,14 +274,20 @@ def placer(cfg: DiGraph, promises: List[Promise], node_chain: List[NodeBlock], t
     target_instr = fix_original_instruction(target_instr, positions)
     instr_queue = Queue()
     promises.reverse()
+    next_pos = 1
     for prom, i in zip(promises, iter_list):
-        rd = check_reg(prom.rd, register_matrix, node_chain[i].reg_pool)
-        rs1 = check_reg(prom.rs1, register_matrix, node_chain[i].reg_pool)
-        rs2 = check_reg(prom.rs2, register_matrix, node_chain[i].reg_pool)
+        if i != iter_list[next_pos]:
+            rd = check_reg(prom.rd, register_matrix, node_chain[i].conjunction_reg)
+        else:
+            rd = check_reg(prom.rd, register_matrix, sample(node_chain[i].reg_pool, 1)[0])
+        rs1 = check_reg(prom.rs1, register_matrix, sample(node_chain[i].reg_pool, 1)[0])
+        rs2 = check_reg(prom.rs2, register_matrix, sample(node_chain[i].reg_pool, 1)[0])
         instr = Instruction(prom.op.name.lower(), opcd_family[prom.op.name.lower()], r1=rd, r2=rs1, r3=rs2,
                             immediate=prom.const)
         instr.inserted = True
         instr_queue.put(instr)
+        if next_pos < len(iter_list)-1:
+            next_pos += 1
     for i in range(len(positions)):
         active_block = cfg.nodes[positions[i][0]]['block']
         for t in range(len(positions[i][1])):

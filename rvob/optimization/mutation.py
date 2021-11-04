@@ -19,7 +19,7 @@ def mutation(p: population, n_individuals, classifica):
             if num <= prob_now:
                 num2 = numpy.random.randint(1, 5)
                 if num2 == 1:
-                    p.individuals[i[1]].heat = int(heat ^ numpy.random.randint(0, int(heat)))
+                    p.individuals[i[1]].heat = int(heat ^ numpy.random.randint(0, int(heat/4)))
                 if num2 == 2:
                     p.individuals[i[1]].scrambling = int(scrambling ^ numpy.random.randint(0, int(scrambling)))
                 if num2 == 3:

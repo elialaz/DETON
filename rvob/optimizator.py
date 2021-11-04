@@ -52,7 +52,7 @@ def run_gen(p, n_individuals, file: str, entry: str, overhead: int):
 
 
 def ga(overhead: int, file: str, entry: str):
-    n_individuals = 20
+    n_individuals = 10
     generation = 200
 
     # setup the population
@@ -105,6 +105,8 @@ def main():
 
     # launch the genetic algorithm
     output = ga(overhead, input_file, entry)
+
+    execute(input_file, entry, output.heat, output.scrambling, output.obfuscate, output.garbage, output.garbage_block, (path.dirname(__file__) + '/metrics/output.s'), False, True)
 
     # print the best param obtained
     output.print_param()

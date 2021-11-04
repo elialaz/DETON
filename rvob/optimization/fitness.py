@@ -6,8 +6,12 @@ def punt_heat(p: population, id: int, diff_heat):
     ideal_heat = p.individuals[id].heat
     punt = 0
     for i in diff_heat:
-        i = ideal_heat - i
-        punt += int(((i*625)/ideal_heat)-312.5)
+        if i >= ideal_heat/2:
+            diff = int(i) - ideal_heat/2
+            punt = punt + int((diff * 312) / ideal_heat/2)
+        else:
+            diff = ideal_heat/2 - i
+            punt = punt + int(((diff * 312) / ideal_heat/2) * -1)
     p.individuals[id].set_punt_heat(punt)
 
 

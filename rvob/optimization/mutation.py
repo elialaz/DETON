@@ -1,6 +1,5 @@
 from rvob.optimization.ga_structures import population
 import numpy
-import math
 
 
 def mutation(p: population, n_individuals, classifica):
@@ -21,15 +20,12 @@ def mutation(p: population, n_individuals, classifica):
                 if num2 == 1:
                     p.individuals[i[1]].heat = int(heat ^ numpy.random.randint(0, int(heat/4)))
                 if num2 == 2:
-                    p.individuals[i[1]].scrambling = int(scrambling ^ numpy.random.randint(0, int(scrambling)))
+                    p.individuals[i[1]].scrambling = int(scrambling ^ numpy.random.randint(0, 50))
                 if num2 == 3:
-                    p.individuals[i[1]].garbage = int(garbage ^ numpy.random.randint(0, int(garbage/2)))
+                    p.individuals[i[1]].garbage = int(garbage ^ numpy.random.randint(0, int(garbage)))
                 if num2 == 4:
                     p.individuals[i[1]].garbage_block = int(garbage_block ^ numpy.random.randint(0, int(garbage_block)))
                 if num2 == 5:
-                    p.individuals[i[1]].obfuscate = int(obfuscate ^ numpy.random.randint(0, int(obfuscate)))
+                    p.individuals[i[1]].obfuscate = int(obfuscate ^ numpy.random.randint(0, 50))
 
             prob_now = prob_now + prob
-
-
-

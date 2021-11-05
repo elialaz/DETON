@@ -13,7 +13,7 @@ import rvob.analysis.heatmaps as heatmaps
 import rvob.scrambling as scrambling
 import rvob.analysis.tracer as tracer
 from rvob.structures import Register
-from rvob.obf.obfuscator import NotEnoughtRegisters, NotValidInstruction
+from rvob.obf.obfuscator import NotEnoughRegisters, NotValidInstruction
 from os import path
 import argparse
 
@@ -239,8 +239,8 @@ def do_scrambling(iter_num: int, heat):
         if ret == -1:
             failed_substitute += 1
 
-    #print("Splitting failure rate: " + str(failed_splitting / iter_num * 100) + "%")
-    #print("Substitution failure rate: " + str(failed_substitute / iter_num * 100) + "%")
+    print("Splitting failure rate: " + str(failed_splitting / iter_num * 100) + "%")
+    print("Substitution failure rate: " + str(failed_substitute / iter_num * 100) + "%")
 
 
 def do_garbage(iter_num: int, garb_par: int):
@@ -248,8 +248,16 @@ def do_garbage(iter_num: int, garb_par: int):
     this perform the garbage instructions insertion
     @param iter_num: the number of iteration to do
     """
+    failed = 0
     for t in range(iter_num):
-        garbage_inserter.insert_garbage_instr(cfg, None, garb_par)
+        for z in range(5):
+            try:
+                garbage_inserter.insert_garbage_instr(cfg)
+                break
+            except NotEnoughRegisters:
+                if z == 4:
+                    failed += 1
+    print("Garbage failure rate: " + str(failed / iter_num * 100) + "%")
 
 
 def do_obfuscate(iter_num: int):
@@ -263,10 +271,10 @@ def do_obfuscate(iter_num: int):
             try:
                 obfuscator.obfuscate(cfg)
                 break
-            except (NotEnoughtRegisters, NotValidInstruction):
+            except (NotEnoughRegisters, NotValidInstruction):
                 if z == 4:
                     failed += 1
-    #print("Obfuscate failure rate: " + str(failed / iter_num * 100) + "%")
+    print("Obfuscate failure rate: " + str(failed / iter_num * 100) + "%")
 
 
 def apply_techniques(heat, scrambling_repetition, obfuscate_repetition, garbage_repetition, garb_par):

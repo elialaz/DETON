@@ -115,15 +115,10 @@ def substitute_reg(cfg: DiGraph, heatmap, heat):
     :return: void
     """
     setup(cfg)
-    iter_limit = len(first_choice_blocks)+len(second_choice_blocks)+len(last_choice_blocks)
-    for k in range(iter_limit):
-        try:
-            value_block, node_id, used_reg, unused_reg = get_scrambling_elements(cfg, heatmap, heat)
-            line_num = value_block.init_line
-            break
-        except (NoSubstitutionException, ValueError):
-            if k == iter_limit - 1:
-                return -1
+    try:
+        node_id, value_block, line_num, used_reg, unused_reg = extract_elements(cfg, heatmap, heat)
+    except NoSubstitutionException:
+        return -1
 
     if isinstance(cfg.nodes[node_id]['block'][line_num], Instruction):
         instruction: Instruction = cfg.nodes[node_id]['block'][line_num]

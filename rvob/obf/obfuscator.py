@@ -8,7 +8,7 @@ from networkx import DiGraph
 from queue import Queue
 
 
-class NotEnoughtRegisters(Exception):
+class NotEnoughRegisters(Exception):
     pass
 
 
@@ -121,7 +121,7 @@ def calc_nodes_chain(cfg: DiGraph, start_node: int, start_line: int, register: R
     actual_block = cfg.nodes[actual_node]["block"]
     node_chain = [NodeBlock(start_node, calc_free_reg(cfg.nodes[start_node], start_line), start_line, start_line)]
     if len(node_chain[0].reg_pool) <= 1:
-        raise NotEnoughtRegisters
+        raise NotEnoughRegisters
     if start_line == (cfg.nodes[start_node]['block'].end - 1):
         next_node = evaluate_next_node(cfg, actual_node, register)
         if next_node is None:

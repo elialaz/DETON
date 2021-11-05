@@ -9,7 +9,7 @@ def heat_ideal_determination(n: int, new_population: population):
 
 # TODO implementing a garbage value range determination
 def garbage_determination(n: int):
-    param = nu.random.uniform(1, 50, n)
+    param = nu.random.uniform(1, 100, n)
     return param
 
 
@@ -20,13 +20,13 @@ def garbage_block_size(n: int):
 
 # TODO implementing an obfuscate value range determination
 def obfuscate_determination(n: int):
-    param = nu.random.uniform(1, 50, n)
+    param = nu.random.uniform(1, 100, n)
     return param
 
 
 # TODO implementing a scrambling value range determination
 def scrambling_determination(n: int):
-    param = nu.random.uniform(1, 50, n)
+    param = nu.random.uniform(1, 100, n)
     return param
 
 

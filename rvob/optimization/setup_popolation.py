@@ -4,7 +4,7 @@ from rvob.optimization.ga_structures import population
 
 # TODO implementing an ideal heat value research
 def heat_ideal_determination(n: int, new_population: population):
-    return 50
+    return 32
 
 
 # TODO implementing a garbage value range determination

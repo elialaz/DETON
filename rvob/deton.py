@@ -239,8 +239,8 @@ def do_scrambling(iter_num: int, heat):
         if ret == -1:
             failed_substitute += 1
 
-    print("Splitting failure rate: " + str(failed_splitting / iter_num * 100) + "%")
-    print("Substitution failure rate: " + str(failed_substitute / iter_num * 100) + "%")
+    #print("Splitting failure rate: " + str(failed_splitting / iter_num * 100) + "%")
+    #print("Substitution failure rate: " + str(failed_substitute / iter_num * 100) + "%")
 
 
 def do_garbage(iter_num: int, garb_par: int):
@@ -258,7 +258,7 @@ def do_garbage(iter_num: int, garb_par: int):
                 if z == 4:
                     failed += 1
 
-    print("Garbage failure rate: " + str(failed / iter_num * 100) + "%")
+    #print("Garbage failure rate: " + str(failed / iter_num * 100) + "%")
 
 
 def do_obfuscate(iter_num: int):
@@ -275,7 +275,7 @@ def do_obfuscate(iter_num: int):
             except (NotEnoughRegisters, NotValidInstruction):
                 if z == 4:
                     failed += 1
-    print("Obfuscate failure rate: " + str(failed / iter_num * 100) + "%")
+    #print("Obfuscate failure rate: " + str(failed / iter_num * 100) + "%")
 
 
 def apply_techniques(heat, scrambling_repetition, obfuscate_repetition, garbage_repetition, garb_par):

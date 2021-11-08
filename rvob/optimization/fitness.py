@@ -5,13 +5,12 @@ from rvob.optimization.ga_structures import population
 def punt_heat_2(p: population, id: int, heat_list):
     lenght = len(heat_list)
     points = (10000/int(lenght))/32
-    first = True
     ideal_heat = p.individuals[id].heat
     punt = 0
     for i in heat_list:
         first = True
         for s in i:
-            if first == True:
+            if first:
                 first = False
             else:
                 if s >= ideal_heat / 2:
@@ -78,9 +77,9 @@ def fitness(p: population, id: int, input: str, input2: str, id_overhead: int):
     count = 1
     before = True
     for i in data:
-        if(count == 0):
+        if count == 0:
             count = 31
-            if before == True:
+            if before:
                 heat_line = [int(s) for s in re.findall(r'\b\d+\b', i)]
                 raw_heat_before.append(heat_line)
             else:
@@ -101,4 +100,3 @@ def fitness(p: population, id: int, input: str, input2: str, id_overhead: int):
     overhead = int((lenght_after[0]/lenght_before[0])*100)
     punt_over(p, overhead, id_overhead, id)
     punt_heat_2(p, id, raw_heat_after)
-

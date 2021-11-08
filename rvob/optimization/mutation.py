@@ -3,11 +3,12 @@ import numpy
 import random
 
 
-#traforma in binary
+# traforma in binary
 def to_bin(n):
     return bin(n).replace("0b", "")
 
-#cambia uno 0 o 1 a caso
+
+# cambia uno 0 o 1 a caso
 def change(x):
     temp_rand = random.randint(1, len(x)) - 1
     flip = str(x)
@@ -16,7 +17,7 @@ def change(x):
         flip_list[temp_rand] = "1"
     else:
         flip_list[temp_rand] = "0"
-    #return del binario trasformato convertito in base 2, ergo decimale
+    # return del binario trasformato convertito in base 2, ergo decimale
     return int("".join(flip_list), 2)
 
 

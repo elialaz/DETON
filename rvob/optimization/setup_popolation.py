@@ -2,12 +2,10 @@ import numpy as nu
 from rvob.optimization.ga_structures import population
 
 
-# TODO implementing an ideal heat value research
-def heat_ideal_determination(n: int, new_population: population):
+def heat_ideal_determination():
     return 32
 
 
-# TODO implementing a garbage value range determination
 def garbage_determination(n: int):
     param = nu.random.uniform(1, 100, n)
     return param
@@ -18,13 +16,11 @@ def garbage_block_size(n: int):
     return param
 
 
-# TODO implementing an obfuscate value range determination
 def obfuscate_determination(n: int):
     param = nu.random.uniform(1, 100, n)
     return param
 
 
-# TODO implementing a scrambling value range determination
 def scrambling_determination(n: int):
     param = nu.random.uniform(1, 100, n)
     return param
@@ -36,7 +32,7 @@ def setup_population(n_individuals: int):
     @param n_individuals: number of individuals
     """
     new_population = population(n_individuals)
-    ideal_heat = heat_ideal_determination(n_individuals, new_population)
+    ideal_heat = heat_ideal_determination()
 
     # setup heat in the new population
     for i in range(n_individuals):

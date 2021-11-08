@@ -63,6 +63,7 @@ def ga(overhead: int, file: str, entry: str):
     count = 0
     first = True
     useless_gen = 0
+    best_cromosome = 0
     while i and count <= generation:
         print("Starting generation " + str(count + 1) + " of maximum " + str(generation))
         run_gen(population, n_individuals, file, entry, overhead)

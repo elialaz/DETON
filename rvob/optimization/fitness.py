@@ -2,6 +2,27 @@ import re
 from rvob.optimization.ga_structures import population
 
 
+def punt_heat_3(p: population, id: int, heat_list_after, heat_list_before):
+    lenght = len(heat_list_after)
+    points = (10000/int(lenght))/32
+    ideal_heat = p.individuals[id].heat
+    punt = 0
+    diff_list = []
+    for i in heat_list_after:
+        diff_heat = []
+        first = True
+        for s in range(33):
+            if first:
+                first = False
+            else:
+                diff_heat.append(int(i[s] - heat_list_before[s-1]))
+        diff_list.append(diff_heat)
+    for i in diff_list:
+        for s in range(32):
+            punt = punt + int(i[s] * points / ideal_heat)
+    p.individuals[id].set_punt_heat(punt)
+
+
 def punt_heat_2(p: population, id: int, heat_list):
     lenght = len(heat_list)
     points = (10000/int(lenght))/32
@@ -23,16 +44,20 @@ def punt_heat_2(p: population, id: int, heat_list):
                 punt = 0
 
 
-def punt_heat(p: population, id: int, diff_heat):
+def punt_heat(p: population, id: int, heat_after, heat_before):
     ideal_heat = p.individuals[id].heat
     punt = 0
+    diff_heat = []
+    for i in range(len(heat_after)):
+        diff_heat.append(int(heat_after[i]-heat_before[i]))
     for i in diff_heat:
-        if i >= ideal_heat/2:
-            diff = int(i) - ideal_heat/2
-            punt = punt + int((diff * 312) / ideal_heat/2)
-        else:
-            diff = ideal_heat/2 - int(i)
-            punt = punt + int(((diff * 312) / ideal_heat/2) * -1)
+        punt = punt + int(i*150/ideal_heat)
+        # if i >= ideal_heat/2:
+        #    diff = int(i) - ideal_heat/2
+        #    punt = punt + int((diff * 312) / ideal_heat/2)
+        # else:
+        #    diff = ideal_heat/2 - int(i)
+        #    punt = punt + int(((diff * 312) / ideal_heat/2) * -1)
     p.individuals[id].set_punt_heat(punt)
 
 
@@ -99,4 +124,6 @@ def fitness(p: population, id: int, input: str, input2: str, id_overhead: int):
     # calc the metrics for the point assignation
     overhead = int((lenght_after[0]/lenght_before[0])*100)
     punt_over(p, overhead, id_overhead, id)
-    punt_heat_2(p, id, raw_heat_after)
+    # punt_heat(p, id, heat_after, heat_before)
+    # punt_heat_2(p, id, raw_heat_after)
+    punt_heat_3(p, id, raw_heat_after, heat_before)

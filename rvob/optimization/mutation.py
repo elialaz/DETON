@@ -22,8 +22,8 @@ def change(x):
 
 
 def mutation(p: population, n_individuals, classifica):
-    prima = True
-    prob = 90 / n_individuals
+    prima = False
+    prob = 130 / n_individuals
     prob_temp = prob
 
     prob_now = prob
@@ -62,6 +62,8 @@ def mutation(p: population, n_individuals, classifica):
                 if num <= prob_now:
                     num2 = numpy.random.randint(1, 5)
                     if num2 == 1:
+                        if heat<=0:
+                            heat = 32
                         p.individuals[i[1]].heat = int(heat ^ numpy.random.randint(0, int(heat / 4)))
                     if num2 == 2:
                         p.individuals[i[1]].scrambling = int(scrambling ^ numpy.random.randint(0, 50))

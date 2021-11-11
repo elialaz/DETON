@@ -289,7 +289,7 @@ def apply_techniques(heat, scrambling_repetition, obfuscate_repetition, garbage_
     do_scrambling(scrambling_repetition, heat)
 
 
-def execute(name: str, entry: str, heat: int, scrambling_repetition: int, obfuscate_repetition: int, garbage_repetition: int, garb_size: int, output: str, bench: bool, metric: bool):
+def execute(name: str, entry: str, heat: int, scrambling_repetition: int, obfuscate_repetition: int, garbage_repetition: int, garb_size: int, output: str, bench: bool, metric: bool, id: str = 1):
 
     global heat_map
     global heat_file
@@ -329,8 +329,8 @@ def execute(name: str, entry: str, heat: int, scrambling_repetition: int, obfusc
             dst = rel + '/benchmark/benchmark_output/' + name + ".txt"
             metric_dst = rel + '/benchmark/benchmark_output/' + name + "_metrics.txt"
         else:
-            dst = rel + '/metrics/data.txt'
-            metric_dst = rel + '/metrics/data_metrics.txt'
+            dst = rel + '/metrics/data' + str(id) + '.txt'
+            metric_dst = rel + '/metrics/data_metrics' + str(id) + '.txt'
         heat_file = open(dst, "w")
         metrics_file = open(metric_dst, "w")
 

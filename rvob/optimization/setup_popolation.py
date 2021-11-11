@@ -2,12 +2,13 @@ import numpy as nu
 from rvob.optimization.ga_structures import population
 
 
-def heat_ideal_determination():
-    return 32
+def heat_ideal_determination(n: int):
+    param = nu.random.uniform(30, 60, n)
+    return param
 
 
 def garbage_determination(n: int):
-    param = nu.random.uniform(1, 100, n)
+    param = nu.random.uniform(1, 200, n)
     return param
 
 
@@ -17,12 +18,12 @@ def garbage_block_size(n: int):
 
 
 def obfuscate_determination(n: int):
-    param = nu.random.uniform(1, 100, n)
+    param = nu.random.uniform(1, 200, n)
     return param
 
 
 def scrambling_determination(n: int):
-    param = nu.random.uniform(1, 100, n)
+    param = nu.random.uniform(1, 200, n)
     return param
 
 
@@ -32,11 +33,11 @@ def setup_population(n_individuals: int):
     @param n_individuals: number of individuals
     """
     new_population = population(n_individuals)
-    ideal_heat = heat_ideal_determination()
+    ideal_heat = heat_ideal_determination(n_individuals)
 
     # setup heat in the new population
     for i in range(n_individuals):
-        new_population.individuals[i].set_heat(ideal_heat)
+        new_population.individuals[i].set_heat(int(ideal_heat[i]))
 
     # setup the garbage insertion value and the garbage block size
     garbage_range = garbage_determination(n_individuals)

@@ -65,7 +65,7 @@ def crossover(p: population, classifica, n_individuals: int):
             gen2 = classifica[i+1][1]
             count = reproduction(gen1, gen2, old_population, new_population, count)
             count = count + 1
-        if (i > third_reproduction_cromosome):
+        if i > third_reproduction_cromosome:
             new_population.individuals[count].set_scrambling(old_population.individuals[classifica[i][1]].scrambling)
             new_population.individuals[count].set_garbage(old_population.individuals[classifica[i][1]].garbage,
                                                           old_population.individuals[classifica[i][1]].garbage_block)

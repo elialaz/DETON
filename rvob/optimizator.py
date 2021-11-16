@@ -123,7 +123,7 @@ def ga(overhead: int, file: str, entry: str):
         # apply the mutation on the new generation
         mutation(population, n_individuals, classifica)
 
-        if (useless_gen == 10) or (best_cromosome.punt_tot > 19900):
+        if (useless_gen == 20) or (best_cromosome.punt_tot > 19900):
             i = False
         count = count + 1
 
@@ -140,18 +140,24 @@ def main():
     global bench
     args = get_args()
     benchmarks = [('bubblesort', ''), ('crc_32', ''), ('dijkstra_small', ''), ('fibonacci', ''),
-                  ('matrixMul', ''), ('patricia', 'bit'), ('quickSort', ''), ('sha', 'sha_transform')]
-    subtest = [('crc_32', ''), ('fibonacci', ''), ('matrixMul', '')]
+                  ('matrixMul', ''), ('patricia', 'bit'), ('quickSort', ''), ('sha', 'sha_transform'), ('bitarray', 'alloc_bit_array'), ('idea', 'mulInv')]
+    subtest = [('bitarray', 'alloc_bit_array'), ('idea', 'mulInv')]
 
     input_file = args.File
     entry = args.e
     overhead = args.Overhead
     bench = args.b
+    count = 50
 
     if bench:
-        for i in benchmarks:
+        for i in subtest:
             # launch the genetic algorithm
             output = ga(overhead, i[0], i[1])
+
+            execute(path.dirname(__file__) + '/benchmark/benchmark_file/' + i[0] + '.json', i[1], output.heat, output.scrambling, output.obfuscate, output.garbage,
+                    output.garbage_block,
+                    (path.dirname(__file__) + '/metrics/output.s'), False, True, count)
+            count = count + 1
 
             # print the best param obtained
             output.print_param()

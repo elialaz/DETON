@@ -1,6 +1,34 @@
 from rvob.optimization.ga_structures import population
 
 
+def reproduction_2(gen1: int, gen2: int, old, new, count):
+    heat1 = old.individuals[gen1].heat
+    heat2 = old.individuals[gen2].heat
+    scrambling1 = old.individuals[gen1].scrambling
+    scrambling2 = old.individuals[gen2].scrambling
+    garbage1 = old.individuals[gen1].garbage
+    garbage2 = old.individuals[gen2].garbage
+    garbage_block1 = old.individuals[gen1].garbage_block
+    garbage_block2 = old.individuals[gen2].garbage_block
+    obfuscate1 = old.individuals[gen1].obfuscate
+    obfuscate2 = old.individuals[gen2].obfuscate
+
+    # set the first child
+    new.individuals[count].set_heat(heat1)
+    new.individuals[count].set_garbage(garbage1, garbage_block1)
+    new.individuals[count].set_obfuscate(obfuscate2)
+    new.individuals[count].set_scrambling(scrambling2)
+
+    # set the second child
+    count = count + 1
+    new.individuals[count].set_heat(heat2)
+    new.individuals[count].set_garbage(garbage2, garbage_block2)
+    new.individuals[count].set_obfuscate(obfuscate1)
+    new.individuals[count].set_scrambling(scrambling1)
+
+    return count
+
+
 def reproduction(gen1: int, gen2: int, old, new, count):
     heat1 = old.individuals[gen1].heat
     heat2 = old.individuals[gen2].heat
@@ -46,9 +74,11 @@ def reproduction(gen1: int, gen2: int, old, new, count):
 def crossover(p: population, classifica, n_individuals: int):
     first_reproduction_cromosome = int((n_individuals / 100) * 10)
     second_reproduction_cromosome = int((n_individuals / 100) * 20) + 1
+    second_reproduction_cromosome_2 = int((n_individuals / 100) * 40) + 1
     third_reproduction_cromosome = int(n_individuals - first_reproduction_cromosome) - 1
     old_population = p
     new_population = population(n_individuals)
+    second = True
 
     # starting the crossover procedure
     count = 0
@@ -60,10 +90,15 @@ def crossover(p: population, classifica, n_individuals: int):
             new_population.individuals[count].set_heat(old_population.individuals[classifica[i][1]].heat)
             new_population.individuals[count].set_obfuscate(old_population.individuals[classifica[i][1]].obfuscate)
             count = count + 1
-        if (i < second_reproduction_cromosome) and (count < n_individuals - 4):
+        if (i < second_reproduction_cromosome) and (count < n_individuals - 4) and second == False:
             gen1 = classifica[i][1]
-            gen2 = classifica[i+1][1]
+            gen2 = classifica[i + 1][1]
             count = reproduction(gen1, gen2, old_population, new_population, count)
+            count = count + 1
+        if (i < second_reproduction_cromosome_2) and (count < n_individuals - 2) and second:
+            gen1 = classifica[i][1]
+            gen2 = classifica[i + 1][1]
+            count = reproduction_2(gen1, gen2, old_population, new_population, count)
             count = count + 1
         if i > third_reproduction_cromosome:
             new_population.individuals[count].set_scrambling(old_population.individuals[classifica[i][1]].scrambling)

@@ -134,8 +134,9 @@ def ga(overhead: int, file: str, entry: str, lenght_before: int, stats: bool, n_
                 best_cromosome = population.individuals[classifica[0][1]]
                 if improvements <= 0.5:
                     useless_gen = useless_gen + 1
-                if improvements >= 10:
-                    useless_gen = 5
+                if improvements >= 2:
+                    if useless_gen > 0:
+                        useless_gen = useless_gen - 1
         if stats:
             plot.append(int(best_cromosome.punt_tot))
 

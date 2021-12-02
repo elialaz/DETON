@@ -195,6 +195,7 @@ def main():
             if stats:
                 # print the overhead
                 print(" Overhead: " + str(int(((num_lines_2 - num_lines) / num_lines) * 100)))
+            print(" ")
 
     else:
         # Get the lenght of the original file
@@ -214,6 +215,7 @@ def main():
         if stats:
             # print the overhead
             print(" Overhead: " + str(int(((num_lines_2-num_lines)/num_lines)*100)))
+        print(" ")
 
 
 if __name__ == "__main__":

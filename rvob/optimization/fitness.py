@@ -74,7 +74,7 @@ def punt_over(p: population, overhead: int, ideal_overhead: int, id: int):
     p.individuals[id].set_punt_over(punt)
 
 
-def fitness(p: population, id: int, input: str, input2: str, id_overhead: int):
+def fitness(p: population, id: int, input: str, input2: str, input3: str, id_overhead: int, lenght_file_before: int):
 
     lenght_before = 0
     lenght_after = 0
@@ -86,6 +86,7 @@ def fitness(p: population, id: int, input: str, input2: str, id_overhead: int):
 
     data = open(input, "r")
     metrics = open(input2, "r")
+    num_lines = sum(1 for line in open(input3))
 
     # recover data from metrics file for the point calc
     for i in metrics:
@@ -122,7 +123,7 @@ def fitness(p: population, id: int, input: str, input2: str, id_overhead: int):
     metrics.close()
 
     # calc the metrics for the point assignation
-    overhead = int((lenght_after[0]/lenght_before[0])*100)
+    overhead = int(((num_lines-lenght_file_before)/lenght_file_before)*100)
     punt_over(p, overhead, id_overhead, id)
     # punt_heat(p, id, heat_after, heat_before)
     # punt_heat_2(p, id, raw_heat_after)

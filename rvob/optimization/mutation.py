@@ -23,7 +23,7 @@ def change(x):
 
 def mutation(p: population, n_individuals, classifica):
     prima = False
-    prob = 130 / n_individuals
+    prob = 150 / n_individuals
     prob_temp = prob
 
     prob_now = prob

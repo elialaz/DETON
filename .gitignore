@@ -1,5 +1,6 @@
 .idea
 venv/
+rvob/metrics/
 **/__pycache__/
 .DS_Store
 

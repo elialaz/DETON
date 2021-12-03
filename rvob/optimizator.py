@@ -45,10 +45,31 @@ def get_args():
         default=False,
         type=bool)
 
+    parser.add_argument(
+        '-s', '-stats',
+        help="Print stats and plot",
+        nargs='?',
+        default=False,
+        type=bool)
+
+    parser.add_argument(
+        '-i', '-individuals',
+        help="Number of individuals in every generation",
+        nargs='?',
+        default=int(20),
+        type=int)
+
+    parser.add_argument(
+        '-g', '-generation',
+        help="Maximum number of generation executed",
+        nargs='?',
+        default=int(200),
+        type=int)
+
     return parser.parse_args()
 
 
-def run_gen(p, n_individuals, file: str, entry: str, overhead: int):
+def run_gen(p, n_individuals, file: str, entry: str, overhead: int, lenght_before: int):
     rel = path.dirname(__file__)
     process = []
 
@@ -72,12 +93,11 @@ def run_gen(p, n_individuals, file: str, entry: str, overhead: int):
     for i in range(n_individuals):
         str1 = rel + '/metrics/data' + str(i) + '.txt'
         str2 = rel + '/metrics/data_metrics' + str(i) + '.txt'
-        fitness(p, i, str1, str2, overhead)
+        str3 = rel + '/metrics/output' + str(i) + '.s'
+        fitness(p, i, str1, str2, str3, overhead, lenght_before)
 
 
-def ga(overhead: int, file: str, entry: str):
-    n_individuals = 20
-    generation = 200
+def ga(overhead: int, file: str, entry: str, lenght_before: int, stats: bool, n_individuals: int, generation: int):
     plot = []
     rel = path.dirname(__file__)
     name = file
@@ -96,8 +116,8 @@ def ga(overhead: int, file: str, entry: str):
     useless_gen = 0
     best_cromosome = 0
     while i and count <= generation:
-        print("Starting generation " + str(count + 1) + " of maximum " + str(generation))
-        run_gen(population, n_individuals, file, entry, overhead)
+        print(" Starting generation " + str(count + 1) + " of maximum " + str(generation))
+        run_gen(population, n_individuals, file, entry, overhead, lenght_before)
         classifica = population.classifica()
 
         # verify the improvements of this generation
@@ -112,10 +132,13 @@ def ga(overhead: int, file: str, entry: str):
             else:
                 improvements = ((population.individuals[classifica[0][1]].punt_tot - best_cromosome.punt_tot) / 300)
                 best_cromosome = population.individuals[classifica[0][1]]
-                if improvements <= 1:
+                if improvements <= 0.5:
                     useless_gen = useless_gen + 1
-
-        plot.append(int(best_cromosome.punt_tot))
+                if improvements >= 1:
+                    if useless_gen > 5:
+                        useless_gen = useless_gen - 5
+        if stats:
+            plot.append(int(best_cromosome.punt_tot))
 
         # apply the crossover
         population = crossover(population, classifica, n_individuals)
@@ -123,15 +146,16 @@ def ga(overhead: int, file: str, entry: str):
         # apply the mutation on the new generation
         mutation(population, n_individuals, classifica)
 
-        if (useless_gen == 10) or (best_cromosome.punt_tot > 19900):
+        if (useless_gen == 20) or (best_cromosome.punt_tot > 19900):
             i = False
         count = count + 1
 
-    plt.title(name)
-    plt.xlabel("Generations")
-    plt.ylabel("Fitness Points")
-    plt.plot(plot)
-    plt.show()
+    if stats:
+        plt.title(name)
+        plt.xlabel("Generations")
+        plt.ylabel("Fitness Points")
+        plt.plot(plot)
+        plt.show()
 
     return best_cromosome
 
@@ -140,31 +164,68 @@ def main():
     global bench
     args = get_args()
     benchmarks = [('bubblesort', ''), ('crc_32', ''), ('dijkstra_small', ''), ('fibonacci', ''),
-                  ('matrixMul', ''), ('patricia', 'bit'), ('quickSort', ''), ('sha', 'sha_transform')]
-    subtest = [('crc_32', ''), ('fibonacci', ''), ('matrixMul', '')]
+                  ('matrixMul', ''), ('patricia', 'bit'), ('quickSort', ''), ('sha', 'sha_transform'),
+                  ('bitarray', 'alloc_bit_array'), ('idea', 'mulInv'),
+                  ('Sha512String', ''), ('rsa', 'mpi_add'), ('aes', '')]
+    subtest = [('bubblesort', ''), ('crc_32', ''), ('dijkstra_small', ''), ('fibonacci', ''),
+                  ('matrixMul', ''), ('patricia', 'bit'), ('quickSort', ''), ('sha', 'sha_transform'),
+                  ('bitarray', 'alloc_bit_array'), ('idea', 'mulInv'),
+                  ('Sha512String', ''), ('rsa', 'mpi_add'), ('aes', '')]
 
     input_file = args.File
     entry = args.e
     overhead = args.Overhead
     bench = args.b
+    count = 50
+    stats = args.s
+    n_indi = args.i
+    gen = args.g
 
     if bench:
-        for i in benchmarks:
+        for i in subtest:
+            # Get the lenght of the original file
+            execute(path.dirname(__file__) + '/benchmark/benchmark_file/' + i[0] + '.json', i[1], 0, 0, 0, 0, 0,
+                    (path.dirname(__file__) + '/metrics/output.s'), False, False, '00')
+            num_lines = sum(1 for line in open((path.dirname(__file__) + '/metrics/output.s')))
+
             # launch the genetic algorithm
-            output = ga(overhead, i[0], i[1])
+            output = ga(overhead, i[0], i[1], num_lines, stats, n_indi, gen)
+
+            execute(path.dirname(__file__) + '/benchmark/benchmark_file/' + i[0] + '.json', i[1], output.heat,
+                    output.scrambling, output.obfuscate, output.garbage,
+                    output.garbage_block,
+                    (path.dirname(__file__) + '/metrics/output.s'), False, True, count)
+            count = count + 1
+            num_lines_2 = sum(1 for line in open((path.dirname(__file__) + '/metrics/output.s')))
 
             # print the best param obtained
             output.print_param()
+            if stats:
+                # print the overhead
+                print(" Overhead: " + str(int(((num_lines_2 - num_lines) / num_lines) * 100)))
+                print(" Length before: " + str(num_lines) + " Length after: " + str(num_lines_2))
+            print(" ")
+
     else:
+        # Get the lenght of the original file
+        execute(input_file, entry, 0, 0, 0, 0, 0, (path.dirname(__file__) + '/metrics/output.s'), False, False)
+        num_lines = sum(1 for line in open((path.dirname(__file__) + '/metrics/output.s')))
+
         # launch the genetic algorithm
-        output = ga(overhead, input_file, entry)
+        output = ga(overhead, input_file, entry, num_lines, stats, n_indi, gen)
 
         execute(input_file, entry, output.heat, output.scrambling, output.obfuscate, output.garbage,
                 output.garbage_block,
                 (path.dirname(__file__) + '/metrics/output.s'), False, True)
+        num_lines_2 = sum(1 for line in open((path.dirname(__file__) + '/metrics/output.s')))
 
         # print the best param obtained
         output.print_param()
+        if stats:
+            # print the overhead
+            print(" Overhead: " + str(int(((num_lines_2 - num_lines) / num_lines) * 100)) + " %")
+            print(" Length before: " + str(num_lines) + " Length after: " + str(num_lines_2))
+        print(" ")
 
 
 if __name__ == "__main__":

@@ -167,9 +167,10 @@ def main():
                   ('matrixMul', ''), ('patricia', 'bit'), ('quickSort', ''), ('sha', 'sha_transform'),
                   ('bitarray', 'alloc_bit_array'), ('idea', 'mulInv'),
                   ('Sha512String', ''), ('rsa', 'mpi_add'), ('aes', '')]
-    subtest = [('bubblesort', ''), ('dijkstra_small', ''), ('fibonacci', ''), ('matrixMul', ''), ('patricia', 'bit'),
-               ('quickSort', ''), ('sha', 'sha_transform'), ('bitarray', 'alloc_bit_array'), ('idea', 'mulInv'),
-               ('Sha512String', ''), ('rsa', 'mpi_add'), ('aes', '')]
+    subtest = [('bubblesort', ''), ('crc_32', ''), ('dijkstra_small', ''), ('fibonacci', ''),
+                  ('matrixMul', ''), ('patricia', 'bit'), ('quickSort', ''), ('sha', 'sha_transform'),
+                  ('bitarray', 'alloc_bit_array'), ('idea', 'mulInv'),
+                  ('Sha512String', ''), ('rsa', 'mpi_add'), ('aes', '')]
 
     input_file = args.File
     entry = args.e
@@ -202,6 +203,7 @@ def main():
             if stats:
                 # print the overhead
                 print(" Overhead: " + str(int(((num_lines_2 - num_lines) / num_lines) * 100)))
+                print(" Lenght before: " + str(num_lines) + " Lenght after: " + str(num_lines_2))
             print(" ")
 
     else:
@@ -221,7 +223,8 @@ def main():
         output.print_param()
         if stats:
             # print the overhead
-            print(" Overhead: " + str(int(((num_lines_2 - num_lines) / num_lines) * 100)))
+            print(" Overhead: " + str(int(((num_lines_2 - num_lines) / num_lines) * 100)) + " %")
+            print(" Lenght before: " + str(num_lines) + " Lenght after: " + str(num_lines_2))
         print(" ")
 
 

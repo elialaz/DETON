@@ -134,7 +134,7 @@ def ga(overhead: int, file: str, entry: str, lenght_before: int, stats: bool, n_
                 best_cromosome = population.individuals[classifica[0][1]]
                 if improvements <= 0.5:
                     useless_gen = useless_gen + 1
-                if improvements >= 2:
+                if improvements >= 1:
                     if useless_gen > 5:
                         useless_gen = useless_gen - 5
         if stats:
@@ -203,7 +203,7 @@ def main():
             if stats:
                 # print the overhead
                 print(" Overhead: " + str(int(((num_lines_2 - num_lines) / num_lines) * 100)))
-                print(" Lenght before: " + str(num_lines) + " Lenght after: " + str(num_lines_2))
+                print(" Length before: " + str(num_lines) + " Length after: " + str(num_lines_2))
             print(" ")
 
     else:
@@ -224,7 +224,7 @@ def main():
         if stats:
             # print the overhead
             print(" Overhead: " + str(int(((num_lines_2 - num_lines) / num_lines) * 100)) + " %")
-            print(" Lenght before: " + str(num_lines) + " Lenght after: " + str(num_lines_2))
+            print(" Length before: " + str(num_lines) + " Length after: " + str(num_lines_2))
         print(" ")
 
 

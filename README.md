@@ -1,6 +1,6 @@
 # DETON
 
-Fork of [DETON](https://github.com/zoythum/RISCV-Obfuscator) for implementation of a genetic algorithm fucused in auto-optimization of the 5 parameters
+Fork of [RISCV-Obfuscator](https://github.com/zoythum/RISCV-Obfuscator) for implementation of a genetic algorithm fucused in auto-optimization of the 5 parameters
 
 ## Installation
 

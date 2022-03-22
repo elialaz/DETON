@@ -196,6 +196,7 @@ def sanitize_contracts(cfg: DiGraph):
         for elem2 in list(cycles):
             if is_sublist(elem, elem2):
                 cycles.remove(elem)
+                break
 
     for cycle in cycles:
         req = cfg.nodes[cycle[0]]['requires']

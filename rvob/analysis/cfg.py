@@ -545,42 +545,54 @@ def exec_graph(cfg: LocalGraph,
 
 
 def build_cfg(src: Source, entry_point: str = "main") -> DiGraph:
-    """
-    Builds the CFG of the supplied assembly code, starting from the specified entry point.
-    
-    The entry point consists of a valid label pointing to what will be considered by the algorithm as the first
-    instruction executed by a caller.
+    """Build CFG of the supplied assembly code, starting from the entry point.
 
-    The resulting graph's nodes either contain a reference to a view, through the node attribute `block`, which
-    represents the block of serial instructions associated with the node, or an `external` flag, signifying that the
-    referenced code is external to the analyzed code.
+    The entry point consists of a valid label pointing to what will be
+    considered by the algorithm as the first instruction executed by a caller.
 
-    Nodes are connected through unweighted edges bearing a `kind` attribute, which describes the type of transition that
-    that edge represents.
+    The resulting graph's nodes either contain a reference to a view, through
+    the node attribute `block`, which represents the block of serial
+    instructions associated with the node, or an `external` flag, signifying
+    that the referenced code is external to the analyzed code.
+
+    Nodes are connected through unweighted edges bearing a `kind` attribute,
+    which describes the type of transition that that edge represents.
 
     :param src: the assembler source to be analyzed
-    :param entry_point: the entry point from which the execution flow will be followed
+    :param entry_point: the entry point from which the execution flow will be
+                        followed
     :return: a directed graph representing the CFG of the analyzed code
-    """
 
-    symbol_table = src.get_labels()
-    # We assume that any label that doesn't start with a dot is a function label
-    function_labels = [fl[1] for fl in symbol_table.items() if not fl[0].startswith('.')]
-    # Extract the basic blocks of each function, storing them in different collections
-    functions_bbs = [basic_blocks(FragmentView(src, sl[0], sl[1], sl[0])) for sl in
-                     zip_longest(function_labels, function_labels[1:], fillvalue=src.end)]
+    """
+    symbol_table = dict()
+    # Get labels from text sections only
+    for lbs in (s.scope.get_labels() for s in src.get_sections()
+                if s.identifier == '.text'):
+        symbol_table.update(lbs)
+
+    # We assume that any label that doesn't start with a dot is a function
+    function_labels = [fl[1] for fl in symbol_table.items() if not
+                       fl[0].startswith('.')]
+    # Extract the basic blocks of each function, storing them in different
+    # collections
+    functions_bbs = [basic_blocks(FragmentView(src, sl[0], sl[1], sl[0])) for
+                     sl in zip_longest(function_labels, function_labels[1:],
+                                       fillvalue=src.end)]
     # Build one big shared graph among all functions
-    common_graph = reduce(lambda g1, g2: g1.merge(g2), (local_cfg(bbs) for bbs in functions_bbs))
+    common_graph = reduce(lambda g1, g2: g1.merge(g2), (local_cfg(bbs) for bbs
+                                                        in functions_bbs))
 
     # Extract the execution graph, relabeling nodes with progressive integer IDs
     execution_graph = exec_graph(internalize_calls(common_graph), entry_point)
     execution_graph = convert_node_labels_to_integers(execution_graph, 1)
 
-    # Attach the special 0-node to the entry point, and redirect all terminal nodes to it via a RETURN transition
+    # Attach the special 0-node to the entry point, and redirect all terminal
+    # nodes to it via a RETURN transition
     execution_graph.add_node(0, external=True)
     execution_graph.add_edge(0, 1, kind=Transition.U_JUMP)
-    execution_graph.add_edges_from(
-        [(term, 0) for term in execution_graph.nodes if execution_graph.out_degree(term) == 0], kind=Transition.RETURN)
+    execution_graph.add_edges_from([(term, 0) for term in execution_graph.nodes
+                                    if execution_graph.out_degree(term) == 0],
+                                   kind=Transition.RETURN)
 
     return execution_graph
 

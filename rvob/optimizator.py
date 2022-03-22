@@ -167,10 +167,7 @@ def main():
                   ('matrixMul', ''), ('patricia', 'bit'), ('quickSort', ''), ('sha', 'sha_transform'),
                   ('bitarray', 'alloc_bit_array'), ('idea', 'mulInv'),
                   ('Sha512String', ''), ('rsa', 'mpi_add'), ('aes', '')]
-    subtest = [('bubblesort', ''), ('crc_32', ''), ('dijkstra_small', ''), ('fibonacci', ''),
-                  ('matrixMul', ''), ('patricia', 'bit'), ('quickSort', ''), ('sha', 'sha_transform'),
-                  ('bitarray', 'alloc_bit_array'), ('idea', 'mulInv'),
-                  ('Sha512String', ''), ('rsa', 'mpi_add'), ('aes', '')]
+    subtest = [('crc_32', '')]
 
     input_file = args.File
     entry = args.e
